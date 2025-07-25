@@ -7,9 +7,16 @@ const bodyParser = require('body-parser');
 const sql = require('mssql');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Export the app for testing and production
+module.exports = (parentApp) => {
+  // If parentApp is provided, use it (for production)
+  // Otherwise, use the local app instance (for development)
+  const expressApp = parentApp || app;
 
 // Middleware
 app.use(cors());
@@ -402,7 +409,25 @@ If no ID is found, set it to null.`;
     }
 });
 
-// Start server
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+  // If this is the main module, start the server (development mode)
+  if (!parentApp) {
+    // Serve static files in development
+    expressApp.use(express.static(path.join(__dirname, '../frontend')));
+    
+    // Start the server
+    const server = expressApp.listen(PORT, () => {
+      console.log(`Server running in development mode on port ${PORT}`);
+    });
+    
+    // Handle unhandled promise rejections
+    process.on('unhandledRejection', (err) => {
+      console.error('Unhandled Rejection:', err);
+      server.close(() => process.exit(1));
+    });
+    
+    return server;
+  }
+  
+  // If we're being used as a module, return the express app
+  return expressApp;
+};

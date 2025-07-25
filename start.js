@@ -17,7 +17,7 @@ const fs = require('fs');
 
 // Configuration
 const PYTHON_SCRIPT_PATH = path.join(__dirname, 'python_docs', 'script.py');
-const SERVER_SCRIPT_PATH = path.join(__dirname, 'backend', 'server.js');
+const SERVER_SCRIPT_PATH = path.join(__dirname, 'server.js');
 const DB_CHECK_TIMEOUT = 60000; // 60 seconds
 const DB_CHECK_INTERVAL = 2000; // 2 seconds
 
@@ -179,30 +179,28 @@ async function waitForDatabase() {
 
 async function startWebServer() {
     return new Promise((resolve, reject) => {
-        logStep('3', 'Starting Web Server');
+        logStep('4', 'Starting web server...');
         
-        if (!fs.existsSync(SERVER_SCRIPT_PATH)) {
-            log('❌ Server script not found at: ' + SERVER_SCRIPT_PATH, 'red');
-            reject(new Error('Server script not found'));
-            return;
-        }
-
-        log('🌐 Starting Node.js web server...', 'blue');
-        
-        const serverProcess = spawn('node', [SERVER_SCRIPT_PATH], {
+        const server = spawn('node', [SERVER_SCRIPT_PATH], {
             stdio: 'inherit',
-            cwd: __dirname
+            shell: true,
+            env: {
+                ...process.env,
+                NODE_ENV: 'development',
+                PORT: process.env.PORT || '3001'
+            }
         });
 
-        serverProcess.on('error', (error) => {
-            log(`❌ Failed to start web server: ${error.message}`, 'red');
+        server.on('error', (error) => {
+            log(`❌ Failed to start server: ${error.message}`, 'red');
             reject(error);
         });
 
         // Give the server a moment to start
         setTimeout(() => {
-            log('✅ Web server started successfully!', 'green');
-            resolve(serverProcess);
+            log('✅ Web server started successfully', 'green');
+            log(`\n🌐 Open your browser to: ${colors.bright}http://localhost:${process.env.PORT || 3001}${colors.reset}\n`, 'green');
+            resolve(server);
         }, 2000);
     });
 }
