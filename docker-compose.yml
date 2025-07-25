@@ -1,25 +1,52 @@
 version: '3.8'
 
 services:
-  sqlserver:
+  app:
+    build: .
+    container_name: dbtweaker-app
+    restart: always
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DB_SERVER=db
+      - DB_PORT=1433
+      - DB_NAME=TallyDB
+      - DB_USER=sa
+      - DB_PASSWORD=YourStrong@Passw0rd
+      - JWT_SECRET=your_jwt_secret_key_here
+      - GEMINI_API_KEY=your_gemini_api_key_here
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - dbtweaker-network
+
+  db:
     image: mcr.microsoft.com/mssql/server:2019-latest
-    container_name: tallydb-intern-sql
+    container_name: dbtweaker-db
     environment:
       - ACCEPT_EULA=Y
-      - SA_PASSWORD=InternPassword123#
+      - SA_PASSWORD=YourStrong@Passw0rd
       - MSSQL_PID=Express
     ports:
-      - "1434:1433"
+      - "1433:1433"
     volumes:
-      - ./python_docs:/var/opt/mssql/backup
       - sqlserver_data:/var/opt/mssql/data
-    restart: unless-stopped
+    restart: always
     healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P InternPassword123# -Q 'SELECT 1'"]
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourStrong@Passw0rd -Q 'SELECT 1' || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 30s
+    networks:
+      - dbtweaker-network
+
+networks:
+  dbtweaker-network:
+    driver: bridge
 
 volumes:
   sqlserver_data:
