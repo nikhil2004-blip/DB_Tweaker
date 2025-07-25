@@ -1,17 +1,27 @@
 # Use Node.js LTS
-FROM node:18
+FROM node:18-alpine
 
 # Create app directory
 WORKDIR /usr/src/app
+
+# Install system dependencies
+RUN apk --no-cache add python3 make g++
 
 # Install app dependencies
 COPY package*.json ./
 RUN npm install --production
 
-# Bundle app source
-COPY . .
+# Copy only necessary files
+COPY server.js .
+COPY backend/ backend/
+COPY frontend/ frontend/
+COPY scripts/ scripts/
 
-# Expose the port the app runs on
+# Set environment variables
+ENV NODE_ENV=production
+ENV PORT=3001
+
+# Expose the app port
 EXPOSE 3001
 
 # Start the application
