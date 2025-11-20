@@ -1,175 +1,298 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DBTweaker - Dashboard</title>
+    <title>DBTweaker - Control Panel</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;600;700&display=swap');
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        :root {
+            --bg-primary: #0a0e27;
+            --bg-secondary: #151932;
+            --bg-tertiary: #1e2139;
+            --accent-primary: #00ff88;
+            --accent-secondary: #00d4ff;
+            --accent-danger: #ff4757;
+            --text-primary: #e4e4e7;
+            --text-secondary: #a1a1aa;
+            --border-color: #2d3250;
+            --glow-color: rgba(0, 255, 136, 0.3);
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
         }
 
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px 0;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        /* Animated background grid */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(var(--border-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--border-color) 1px, transparent 1px);
+            background-size: 50px 50px;
+            opacity: 0.1;
+            animation: gridMove 20s linear infinite;
+            z-index: 0;
         }
 
-        .header-content {
-            max-width: 1200px;
+        @keyframes gridMove {
+            0% {
+                transform: translate(0, 0);
+            }
+
+            100% {
+                transform: translate(50px, 50px);
+            }
+        }
+
+        /* Matrix particles */
+        .particle {
+            position: fixed;
+            width: 5px;
+            height: 5px;
+            background: var(--accent-primary);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-primary);
+            animation: matrixRain 8s linear infinite;
+            z-index: 0;
+        }
+
+        @keyframes matrixRain {
+            0% {
+                transform: translateY(100vh);
+                opacity: 0;
+            }
+
+            5% {
+                opacity: 0.8;
+            }
+
+            95% {
+                opacity: 0.8;
+            }
+
+            100% {
+                transform: translateY(-10vh);
+                opacity: 0;
+            }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 0 20px;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px 30px;
+            margin-bottom: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.1);
+            animation: slideDown 0.6s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         .logo {
-            font-size: 1.8rem;
-            font-weight: bold;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 15px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 20px var(--glow-color);
+            }
+
+            50% {
+                box-shadow: 0 0 40px var(--glow-color);
+            }
         }
 
         .user-info {
             display: flex;
             align-items: center;
             gap: 15px;
-        }
-
-        .nav-link {
-            color: white;
-            text-decoration: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            transition: background 0.3s ease;
-            font-weight: 500;
-        }
-        
-        .nav-link:hover {
-            background: rgba(255, 255, 255, 0.2);
+            font-family: 'JetBrains Mono', monospace;
         }
 
         .username {
+            color: var(--accent-primary);
+            font-weight: 600;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-link {
+            padding: 8px 20px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
             font-weight: 500;
         }
 
-        .logout-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        .nav-link:hover {
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 20px var(--glow-color);
+            transform: translateY(-2px);
         }
 
-        .logout-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-1px);
+        /* Main content */
+        .main-content {
+            animation: fadeIn 0.8s ease-out 0.2s both;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 30px 20px;
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        .welcome-section {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-
-        .welcome-title {
-            font-size: 2rem;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .welcome-subtitle {
-            color: #666;
-            font-size: 1.1rem;
-        }
-
+        /* Tabs */
         .tabs {
             display: flex;
-            background: white;
-            border-radius: 15px;
-            padding: 8px;
-            margin-bottom: 30px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-            overflow-x: auto;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
         }
 
         .tab {
-            flex: 1;
-            padding: 15px 20px;
-            text-align: center;
-            border-radius: 10px;
+            padding: 12px 24px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
             font-weight: 600;
-            white-space: nowrap;
+            font-size: 0.9rem;
             display: flex;
             align-items: center;
-            justify-content: center;
             gap: 8px;
         }
 
         .tab.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: var(--bg-primary);
+            border-color: transparent;
+            box-shadow: 0 0 25px var(--glow-color);
         }
 
         .tab:not(.active):hover {
-            background: #f8f9fa;
-            transform: translateY(-1px);
+            border-color: var(--accent-primary);
+            transform: translateY(-2px);
         }
 
+        /* Tab content */
         .tab-content {
             display: none;
-            background: white;
-            border-radius: 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
             padding: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
+            box-shadow: 0 0 40px rgba(0, 255, 136, 0.05);
         }
 
         .tab-content.active {
             display: block;
-            animation: fadeIn 0.3s ease;
+            animation: slideUp 0.4s ease-out;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .section-title {
-            font-size: 1.5rem;
-            color: #333;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.2rem;
+            color: var(--accent-primary);
             margin-bottom: 20px;
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
+        .section-title::before {
+            content: '>';
+            color: var(--accent-secondary);
+        }
+
+        /* Forms */
         .form-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -177,408 +300,383 @@
             margin-bottom: 20px;
         }
 
-        .input-group {
-            position: relative;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 15px 20px;
-            border: 2px solid #e1e5e9;
-            border-radius: 12px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            background: #f8f9fa;
-        }
-
-        .input-group input:focus {
-            outline: none;
-            border-color: #667eea;
-            background: white;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
-        }
-
-        .input-group label {
-            position: absolute;
-            left: 20px;
-            top: 15px;
-            color: #666;
-            transition: all 0.3s ease;
-            pointer-events: none;
-            background: white;
-            padding: 0 5px;
-        }
-
-        .input-group input:focus + label,
-        .input-group input:not(:placeholder-shown) + label {
-            top: -8px;
-            font-size: 0.8rem;
-            color: #667eea;
-            font-weight: 600;
-        }
-
-        .btn {
-            padding: 15px 30px;
-            border: none;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
+        .form-group {
+            display: flex;
+            flex-direction: column;
             gap: 8px;
         }
 
-        .btn-primary {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
+        .form-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
         }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #5a6268;
-            transform: translateY(-2px);
-        }
-
-        .btn-danger {
-            background: #dc3545;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #c82333;
-            transform: translateY(-2px);
-        }
-
-        .btn-success {
-            background: #28a745;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #218838;
-            transform: translateY(-2px);
-        }
-
-        .message {
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            font-weight: 500;
-            display: none;
-        }
-
-        .message.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .message.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .data-grid {
-            display: grid;
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .data-item {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 12px;
-            padding: 20px;
+        .form-input {
+            padding: 12px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-family: 'JetBrains Mono', monospace;
+            outline: none;
             transition: all 0.3s ease;
         }
 
-        .data-item:hover {
+        .form-input:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 20px var(--glow-color);
+        }
+
+        .btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border: none;
+            border-radius: 8px;
+            color: var(--bg-primary);
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 25px var(--glow-color);
         }
 
-        .data-item-header {
-            display: flex;
-            justify-content: between;
-            align-items: center;
-            margin-bottom: 10px;
+        .btn:active {
+            transform: translateY(0);
         }
 
-        .data-item-id {
-            background: #667eea;
-            color: white;
-            padding: 5px 12px;
-            border-radius: 20px;
+        .btn-danger {
+            background: linear-gradient(135deg, var(--accent-danger), #ff6b81);
+        }
+
+        /* Table */
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'JetBrains Mono', monospace;
             font-size: 0.9rem;
+        }
+
+        thead {
+            background: var(--bg-tertiary);
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            color: var(--accent-primary);
             font-weight: 600;
-        }
-
-        .data-item-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .data-field {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .data-field-label {
-            font-size: 0.8rem;
-            color: #666;
-            font-weight: 600;
+            border-bottom: 2px solid var(--border-color);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
+            font-size: 0.8rem;
         }
 
-        .data-field-value {
-            font-size: 1rem;
-            color: #333;
-            font-weight: 500;
-            margin-top: 2px;
+        td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
         }
 
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #666;
+        tbody tr {
+            transition: all 0.3s ease;
         }
 
-        .empty-state-icon {
-            font-size: 4rem;
+        tbody tr:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+        }
+
+        .action-btn:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        .action-btn.delete:hover {
+            border-color: var(--accent-danger);
+            color: var(--accent-danger);
+        }
+
+        /* Messages */
+        .message {
+            padding: 15px 20px;
+            border-radius: 8px;
             margin-bottom: 20px;
-            opacity: 0.5;
+            display: none;
+            animation: slideIn 0.3s ease-out;
         }
 
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #666;
+        @keyframes slideIn {
+            from {
+                transform: translateX(-20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
 
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+        .message.success {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid var(--accent-primary);
+            color: var(--accent-primary);
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .message.error {
+            background: rgba(255, 71, 87, 0.1);
+            border: 1px solid var(--accent-danger);
+            color: var(--accent-danger);
         }
 
+        /* Responsive */
         @media (max-width: 768px) {
-            .header-content {
+            .header {
                 flex-direction: column;
                 gap: 15px;
-                text-align: center;
             }
 
             .tabs {
                 flex-direction: column;
-                gap: 5px;
+            }
+
+            .tab {
+                width: 100%;
             }
 
             .form-grid {
                 grid-template-columns: 1fr;
             }
 
-            .data-item-content {
-                grid-template-columns: 1fr;
+            table {
+                font-size: 0.8rem;
+            }
+
+            th,
+            td {
+                padding: 10px;
             }
         }
     </style>
 </head>
+
 <body>
-    <!-- Header -->
-    <div class="header">
-        <div class="header-content">
-            <div class="logo">
-                🗄️ DBTweaker
-            </div>
-            <div class="user-info">
-                <a href="chatbot.html" class="nav-link">🤖 AI Chatbot</a>
-                <span class="username" id="username">Loading...</span>
-                <button class="logout-btn" onclick="logout()">Logout</button>
-            </div>
-        </div>
-    </div>
+    <!-- Matrix particles -->
+    <div class="particle" style="left: 5%; animation-delay: 0s;"></div>
+    <div class="particle" style="left: 15%; animation-delay: 0.5s;"></div>
+    <div class="particle" style="left: 25%; animation-delay: 1s;"></div>
+    <div class="particle" style="left: 35%; animation-delay: 1.5s;"></div>
+    <div class="particle" style="left: 45%; animation-delay: 2s;"></div>
+    <div class="particle" style="left: 55%; animation-delay: 2.5s;"></div>
+    <div class="particle" style="left: 65%; animation-delay: 3s;"></div>
+    <div class="particle" style="left: 75%; animation-delay: 3.5s;"></div>
+    <div class="particle" style="left: 85%; animation-delay: 4s;"></div>
+    <div class="particle" style="left: 95%; animation-delay: 4.5s;"></div>
+    <div class="particle" style="left: 10%; animation-delay: 5s;"></div>
+    <div class="particle" style="left: 20%; animation-delay: 5.5s;"></div>
+    <div class="particle" style="left: 30%; animation-delay: 6s;"></div>
+    <div class="particle" style="left: 40%; animation-delay: 6.5s;"></div>
+    <div class="particle" style="left: 50%; animation-delay: 7s;"></div>
+    <div class="particle" style="left: 60%; animation-delay: 7.5s;"></div>
+    <div class="particle" style="left: 70%; animation-delay: 0.3s;"></div>
+    <div class="particle" style="left: 80%; animation-delay: 1.3s;"></div>
+    <div class="particle" style="left: 90%; animation-delay: 2.3s;"></div>
+    <div class="particle" style="left: 12%; animation-delay: 3.3s;"></div>
 
     <div class="container">
-        <!-- Welcome Section -->
-        <div class="welcome-section">
-            <h1 class="welcome-title">Welcome to Your Dashboard</h1>
-            <p class="welcome-subtitle">Manage your data with powerful CRUD operations</p>
-        </div>
-
-        <!-- Tabs -->
-        <div class="tabs">
-            <div class="tab active" onclick="switchTab('create')">
-                📝 Create
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <div class="logo-icon">⚡</div>
+                <div>DBTweaker Control Panel</div>
             </div>
-            <div class="tab" onclick="switchTab('read')">
-                📖 View Data
-            </div>
-            <div class="tab" onclick="switchTab('update')">
-                ✏️ Update
-            </div>
-            <div class="tab" onclick="switchTab('delete')">
-                🗑️ Delete
-            </div>
-        </div>
-
-        <!-- CREATE Tab -->
-        <div id="createTab" class="tab-content active">
-            <h2 class="section-title">📝 Create New Entry</h2>
-            <form id="createForm">
-                <div class="form-grid">
-                    <div class="input-group">
-                        <input type="text" id="createName" placeholder=" " required>
-                        <label for="createName">Full Name</label>
-                    </div>
-                    <div class="input-group">
-                        <input type="tel" id="createPhone" placeholder=" " required>
-                        <label for="createPhone">Phone Number</label>
-                    </div>
-                    <div class="input-group">
-                        <input type="text" id="createAddress" placeholder=" " required>
-                        <label for="createAddress">Address</label>
-                    </div>
+            <div class="user-info">
+                <span>USER:</span>
+                <span class="username" id="usernameDisplay"></span>
+                <div class="nav-links">
+                    <a href="chatbot.html" class="nav-link">AI Terminal</a>
+                    <a href="login.html" class="nav-link" onclick="logout()">Logout</a>
                 </div>
-                <button type="submit" class="btn btn-primary">
-                    ➕ Create Entry
-                </button>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="main-content">
+            <!-- Tabs -->
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('create')">
+                    <span>📝</span> CREATE
+                </div>
+                <div class="tab" onclick="switchTab('read')">
+                    <span>📖</span> READ
+                </div>
+                <div class="tab" onclick="switchTab('update')">
+                    <span>✏️</span> UPDATE
+                </div>
+                <div class="tab" onclick="switchTab('delete')">
+                    <span>🗑️</span> DELETE
+                </div>
+            </div>
+
+            <!-- CREATE Tab -->
+            <div id="createTab" class="tab-content active">
+                <div class="section-title">CREATE NEW RECORD</div>
                 <div id="createMessage" class="message"></div>
-            </form>
-        </div>
+                <form id="createForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-input" id="createName" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Phone</label>
+                            <input type="text" class="form-input" id="createPhone" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Address</label>
+                            <input type="text" class="form-input" id="createAddress" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn">EXECUTE CREATE</button>
+                </form>
+            </div>
 
-        <!-- READ Tab -->
-        <div id="readTab" class="tab-content">
-            <h2 class="section-title">📖 All Data Entries</h2>
-            <button class="btn btn-secondary" onclick="loadAllData()">
-                🔄 Refresh Data
-            </button>
-            <div id="dataList">
-                <div class="loading">
-                    <div class="spinner"></div>
-                    Loading data...
+            <!-- READ Tab -->
+            <div id="readTab" class="tab-content">
+                <div class="section-title">DATABASE RECORDS</div>
+                <div id="readMessage" class="message"></div>
+                <button class="btn" onclick="loadData()">LOAD ALL RECORDS</button>
+                <div class="table-container">
+                    <table id="dataTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>NAME</th>
+                                <th>PHONE</th>
+                                <th>ADDRESS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: var(--text-secondary);">
+                                    Click "LOAD ALL RECORDS" to view data
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
-        </div>
 
-        <!-- UPDATE Tab -->
-        <div id="updateTab" class="tab-content">
-            <h2 class="section-title">✏️ Update Entry</h2>
-            <form id="updateForm">
-                <div class="form-grid">
-                    <div class="input-group">
-                        <input type="number" id="updateId" placeholder=" " required>
-                        <label for="updateId">Entry ID</label>
-                    </div>
-                    <div class="input-group">
-                        <input type="text" id="updateName" placeholder=" " required>
-                        <label for="updateName">Full Name</label>
-                    </div>
-                    <div class="input-group">
-                        <input type="tel" id="updatePhone" placeholder=" " required>
-                        <label for="updatePhone">Phone Number</label>
-                    </div>
-                    <div class="input-group">
-                        <input type="text" id="updateAddress" placeholder=" " required>
-                        <label for="updateAddress">Address</label>
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-success">
-                    💾 Update Entry
-                </button>
+            <!-- UPDATE Tab -->
+            <div id="updateTab" class="tab-content">
+                <div class="section-title">UPDATE RECORD</div>
                 <div id="updateMessage" class="message"></div>
-            </form>
-        </div>
-
-        <!-- DELETE Tab -->
-        <div id="deleteTab" class="tab-content">
-            <h2 class="section-title">🗑️ Delete Entry</h2>
-            <form id="deleteForm">
-                <div class="form-grid">
-                    <div class="input-group">
-                        <input type="number" id="deleteId" placeholder=" " required>
-                        <label for="deleteId">Entry ID to Delete</label>
+                <form id="updateForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Record ID</label>
+                            <input type="number" class="form-input" id="updateId" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-input" id="updateName" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Phone</label>
+                            <input type="text" class="form-input" id="updatePhone" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Address</label>
+                            <input type="text" class="form-input" id="updateAddress" required>
+                        </div>
                     </div>
-                </div>
-                <button type="submit" class="btn btn-danger">
-                    🗑️ Delete Entry
-                </button>
+                    <button type="submit" class="btn">EXECUTE UPDATE</button>
+                </form>
+            </div>
+
+            <!-- DELETE Tab -->
+            <div id="deleteTab" class="tab-content">
+                <div class="section-title">DELETE RECORD</div>
                 <div id="deleteMessage" class="message"></div>
-            </form>
+                <form id="deleteForm">
+                    <div class="form-group" style="max-width: 300px;">
+                        <label class="form-label">Record ID to Delete</label>
+                        <input type="number" class="form-input" id="deleteId" required>
+                    </div>
+                    <button type="submit" class="btn btn-danger">EXECUTE DELETE</button>
+                </form>
+            </div>
         </div>
     </div>
 
     <script>
         const API_BASE = 'http://localhost:3001';
         let token = localStorage.getItem('jwt_token');
+        let username = localStorage.getItem('username');
 
-        // Check authentication on page load
-        if (!token) {
+        // Check authentication
+        if (!token || !username) {
             window.location.href = 'login.html';
         }
 
-        // Set username
-        document.getElementById('username').textContent = localStorage.getItem('username') || 'User';
+        document.getElementById('usernameDisplay').textContent = username.toUpperCase();
 
         // Tab switching
         function switchTab(tabName) {
-            // Remove active class from all tabs and contents
-            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            
-            // Add active class to clicked tab and corresponding content
-            event.target.classList.add('active');
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.closest('.tab').classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.getElementById(tabName + 'Tab').classList.add('active');
-            
-            // Load data when switching to read tab
-            if (tabName === 'read') {
-                loadAllData();
-            }
         }
 
-        // Show message helper
-        function showMessage(elementId, message, isError = false) {
-            const element = document.getElementById(elementId);
-            element.textContent = message;
-            element.className = `message ${isError ? 'error' : 'success'}`;
-            element.style.display = 'block';
-            
-            setTimeout(() => {
-                element.style.display = 'none';
-            }, 5000);
+        // Show message
+        function showMessage(elementId, message, type) {
+            const msgEl = document.getElementById(elementId);
+            msgEl.textContent = message;
+            msgEl.className = `message ${type}`;
+            msgEl.style.display = 'block';
+            setTimeout(() => msgEl.style.display = 'none', 5000);
         }
 
-        // CREATE operation
-        document.getElementById('createForm').onsubmit = async (e) => {
+        // CREATE
+        document.getElementById('createForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const name = document.getElementById('createName').value;
-            const phone = document.getElementById('createPhone').value;
-            const address = document.getElementById('createAddress').value;
-            
+            const data = {
+                name: document.getElementById('createName').value,
+                phone: document.getElementById('createPhone').value,
+                address: document.getElementById('createAddress').value
+            };
+
             try {
                 const response = await fetch(`${API_BASE}/api/submit`, {
                     method: 'POST',
@@ -586,146 +684,118 @@
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify({ name, phone, address })
+                    body: JSON.stringify(data)
                 });
-                
-                const data = await response.json();
-                
+
+                const result = await response.json();
                 if (response.ok) {
-                    showMessage('createMessage', 'Entry created successfully!', false);
+                    showMessage('createMessage', 'Record created successfully!', 'success');
                     document.getElementById('createForm').reset();
                 } else {
-                    showMessage('createMessage', data.error || 'Creation failed', true);
+                    showMessage('createMessage', result.error || 'Creation failed', 'error');
                 }
-            } catch (err) {
-                showMessage('createMessage', 'Network error. Please try again.', true);
+            } catch (error) {
+                showMessage('createMessage', 'Network error', 'error');
             }
-        };
+        });
 
-        // READ operation
-        async function loadAllData() {
-            const dataList = document.getElementById('dataList');
-            dataList.innerHTML = '<div class="loading"><div class="spinner"></div>Loading data...</div>';
-            
+        // READ
+        async function loadData() {
             try {
                 const response = await fetch(`${API_BASE}/api/userinfo`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                
+
                 const result = await response.json();
-                
                 if (response.ok) {
+                    const tbody = document.getElementById('tableBody');
                     if (result.data.length === 0) {
-                        dataList.innerHTML = `
-                            <div class="empty-state">
-                                <div class="empty-state-icon">📭</div>
-                                <h3>No data found</h3>
-                                <p>Create your first entry to get started!</p>
-                            </div>
-                        `;
+                        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-secondary);">No records found</td></tr>';
                     } else {
-                        dataList.innerHTML = `
-                            <div class="data-grid">
-                                ${result.data.map(item => `
-                                    <div class="data-item">
-                                        <div class="data-item-header">
-                                            <div class="data-item-id">ID: ${item.Id}</div>
-                                        </div>
-                                        <div class="data-item-content">
-                                            <div class="data-field">
-                                                <div class="data-field-label">Name</div>
-                                                <div class="data-field-value">${item.Name}</div>
-                                            </div>
-                                            <div class="data-field">
-                                                <div class="data-field-label">Phone</div>
-                                                <div class="data-field-value">${item.Phone}</div>
-                                            </div>
-                                            <div class="data-field">
-                                                <div class="data-field-label">Address</div>
-                                                <div class="data-field-value">${item.Address}</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        `;
+                        tbody.innerHTML = result.data.map(item => `
+                            <tr>
+                                <td>${item.Id}</td>
+                                <td>${item.Name}</td>
+                                <td>${item.Phone}</td>
+                                <td>${item.Address}</td>
+                            </tr>
+                        `).join('');
                     }
+                    showMessage('readMessage', `Loaded ${result.data.length} records`, 'success');
                 } else {
-                    dataList.innerHTML = `<div class="empty-state"><div class="empty-state-icon">❌</div><h3>Error loading data</h3><p>${result.error}</p></div>`;
+                    showMessage('readMessage', result.error || 'Failed to load data', 'error');
                 }
-            } catch (err) {
-                dataList.innerHTML = `<div class="empty-state"><div class="empty-state-icon">❌</div><h3>Network Error</h3><p>Please check your connection and try again.</p></div>`;
+            } catch (error) {
+                showMessage('readMessage', 'Network error', 'error');
             }
         }
 
-        // UPDATE operation
-        document.getElementById('updateForm').onsubmit = async (e) => {
+        // UPDATE
+        document.getElementById('updateForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const id = document.getElementById('updateId').value;
-            const name = document.getElementById('updateName').value;
-            const phone = document.getElementById('updatePhone').value;
-            const address = document.getElementById('updateAddress').value;
-            
+            const data = {
+                name: document.getElementById('updateName').value,
+                phone: document.getElementById('updatePhone').value,
+                address: document.getElementById('updateAddress').value
+            };
+
             try {
-                const response = await fetch(`${API_BASE}/api/userinfo/${id}`, {
+                const response = await fetch(`${API_BASE}/api/update/${id}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify({ name, phone, address })
+                    body: JSON.stringify(data)
                 });
-                
-                const data = await response.json();
-                
+
+                const result = await response.json();
                 if (response.ok) {
-                    showMessage('updateMessage', 'Entry updated successfully!', false);
+                    showMessage('updateMessage', 'Record updated successfully!', 'success');
                     document.getElementById('updateForm').reset();
                 } else {
-                    showMessage('updateMessage', data.error || 'Update failed', true);
+                    showMessage('updateMessage', result.error || 'Update failed', 'error');
                 }
-            } catch (err) {
-                showMessage('updateMessage', 'Network error. Please try again.', true);
+            } catch (error) {
+                showMessage('updateMessage', 'Network error', 'error');
             }
-        };
+        });
 
-        // DELETE operation
-        document.getElementById('deleteForm').onsubmit = async (e) => {
+        // DELETE
+        document.getElementById('deleteForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const id = document.getElementById('deleteId').value;
-            
-            if (!confirm(`Are you sure you want to delete entry ${id}? This action cannot be undone.`)) {
+
+            if (!confirm(`Are you sure you want to delete record #${id}?`)) {
                 return;
             }
-            
+
             try {
-                const response = await fetch(`${API_BASE}/api/userinfo/${id}`, {
+                const response = await fetch(`${API_BASE}/api/delete/${id}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                
-                const data = await response.json();
-                
+
+                const result = await response.json();
                 if (response.ok) {
-                    showMessage('deleteMessage', 'Entry deleted successfully!', false);
+                    showMessage('deleteMessage', 'Record deleted successfully!', 'success');
                     document.getElementById('deleteForm').reset();
                 } else {
-                    showMessage('deleteMessage', data.error || 'Delete failed', true);
+                    showMessage('deleteMessage', result.error || 'Delete failed', 'error');
                 }
-            } catch (err) {
-                showMessage('deleteMessage', 'Network error. Please try again.', true);
+            } catch (error) {
+                showMessage('deleteMessage', 'Network error', 'error');
             }
-        };
+        });
 
-        // Logout function
+        // Logout
         function logout() {
             localStorage.removeItem('jwt_token');
             localStorage.removeItem('username');
             window.location.href = 'login.html';
         }
-
-        // Load data on page load
-        loadAllData();
     </script>
 </body>
+
 </html>

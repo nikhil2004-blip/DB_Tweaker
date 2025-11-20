@@ -1,283 +1,428 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DBTweaker - Login</title>
+    <title>DBTweaker - System Access</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;600;700&display=swap');
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        :root {
+            --bg-primary: #0a0e27;
+            --bg-secondary: #151932;
+            --bg-tertiary: #1e2139;
+            --accent-primary: #00ff88;
+            --accent-secondary: #00d4ff;
+            --accent-danger: #ff4757;
+            --text-primary: #e4e4e7;
+            --text-secondary: #a1a1aa;
+            --border-color: #2d3250;
+            --glow-color: rgba(0, 255, 136, 0.3);
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(var(--border-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--border-color) 1px, transparent 1px);
+            background-size: 50px 50px;
+            opacity: 0.1;
+            animation: gridMove 20s linear infinite;
+            z-index: 0;
+        }
+
+        @keyframes gridMove {
+            0% {
+                transform: translate(0, 0);
+            }
+
+            100% {
+                transform: translate(50px, 50px);
+            }
+        }
+
+        /* Floating particles - Matrix style */
+        .particle {
+            position: fixed;
+            width: 5px;
+            height: 5px;
+            background: var(--accent-primary);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-primary);
+            animation: matrixRain 8s linear infinite;
+            z-index: 0;
+        }
+
+        @keyframes matrixRain {
+            0% {
+                transform: translateY(0);
+                opacity: 0;
+            }
+
+            5% {
+                opacity: 0.8;
+            }
+
+            95% {
+                opacity: 0.8;
+            }
+
+            100% {
+                transform: translateY(-110vh);
+                opacity: 0;
+            }
         }
 
         .container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            padding: 40px;
+            position: relative;
+            z-index: 1;
             width: 100%;
             max-width: 450px;
+            padding: 20px;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 0 60px rgba(0, 255, 136, 0.1);
+        }
+
+        .logo-container {
             text-align: center;
+            margin-bottom: 40px;
         }
 
-        .logo {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #667eea;
-            margin-bottom: 10px;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .subtitle {
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 1.1rem;
-        }
-
-        .form-container {
+        .logo-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
             margin-bottom: 20px;
+            animation: pulse 2s ease-in-out infinite;
         }
 
-        .form-container.hidden {
-            display: none;
+        @keyframes pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 30px var(--glow-color);
+            }
+
+            50% {
+                box-shadow: 0 0 60px var(--glow-color);
+            }
         }
 
-        .form-title {
-            font-size: 1.5rem;
-            color: #333;
-            margin-bottom: 25px;
-            font-weight: 600;
-        }
-
-        .input-group {
-            position: relative;
-            margin-bottom: 20px;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 15px 20px;
-            border: 2px solid #e1e5e9;
-            border-radius: 12px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            background: #f8f9fa;
-        }
-
-        .input-group input:focus {
-            outline: none;
-            border-color: #667eea;
-            background: white;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
-        }
-
-        .input-group label {
-            position: absolute;
-            left: 20px;
-            top: 15px;
-            color: #666;
-            transition: all 0.3s ease;
-            pointer-events: none;
-            background: white;
-            padding: 0 5px;
-        }
-
-        .input-group input:focus + label,
-        .input-group input:not(:placeholder-shown) + label {
-            top: -8px;
-            font-size: 0.8rem;
-            color: #667eea;
-            font-weight: 600;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 15px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
-        }
-
-        .btn-secondary {
-            background: transparent;
-            color: #667eea;
-            border: 2px solid #667eea;
-        }
-
-        .btn-secondary:hover {
-            background: #667eea;
-            color: white;
-            transform: translateY(-2px);
-        }
-
-        .message {
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-weight: 500;
-        }
-
-        .message.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .message.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .toggle-text {
-            color: #666;
-            margin-top: 20px;
-        }
-
-        .toggle-link {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .toggle-link:hover {
-            text-decoration: underline;
-        }
-
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 15px;
-            margin-top: 30px;
-            padding-top: 30px;
-            border-top: 1px solid #e1e5e9;
-        }
-
-        .feature {
-            text-align: center;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            transition: transform 0.3s ease;
-        }
-
-        .feature:hover {
-            transform: translateY(-3px);
-        }
-
-        .feature-icon {
-            font-size: 1.5rem;
+        .logo-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2rem;
+            font-weight: 700;
             margin-bottom: 8px;
         }
 
-        .feature-text {
+        .logo-subtitle {
+            color: var(--text-secondary);
             font-size: 0.9rem;
-            color: #666;
-            font-weight: 500;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .terminal-prompt {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent-primary);
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+        }
+
+        .terminal-prompt::before {
+            content: '> ';
+            color: var(--accent-secondary);
+            animation: cursorBlink 1s step-end infinite;
+        }
+
+        @keyframes cursorBlink {
+
+            0%,
+            50% {
+                opacity: 1;
+            }
+
+            51%,
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: var(--bg-primary);
+            border-color: transparent;
+            box-shadow: 0 0 20px var(--glow-color);
+        }
+
+        .tab:not(.active):hover {
+            border-color: var(--accent-primary);
+            transform: translateY(-2px);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-family: 'JetBrains Mono', monospace;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 20px var(--glow-color);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border: none;
+            border-radius: 8px;
+            color: var(--bg-primary);
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 30px var(--glow-color);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .error-message {
+            background: rgba(255, 71, 87, 0.1);
+            border: 1px solid var(--accent-danger);
+            color: var(--accent-danger);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .success-message {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid var(--accent-primary);
+            color: var(--accent-primary);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .footer-text {
+            text-align: center;
+            margin-top: 30px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
         }
 
         @media (max-width: 480px) {
-            .container {
+            .login-box {
                 padding: 30px 20px;
             }
-            
-            .logo {
+
+            .logo-icon {
+                width: 60px;
+                height: 60px;
                 font-size: 2rem;
+            }
+
+            .logo-text {
+                font-size: 1.5rem;
             }
         }
     </style>
 </head>
+
 <body>
+    <!-- Floating particles - Matrix style -->
+    <div class="particle" style="left: 5%; top: 122%; animation-delay: 0s;"></div>
+    <div class="particle" style="left: 15%; top: 168%; animation-delay: 0.5s;"></div>
+    <div class="particle" style="left: 25%; top: 141%; animation-delay: 1s;"></div>
+    <div class="particle" style="left: 35%; top: 185%; animation-delay: 1.5s;"></div>
+    <div class="particle" style="left: 45%; top: 114%; animation-delay: 2s;"></div>
+    <div class="particle" style="left: 55%; top: 157%; animation-delay: 2.5s;"></div>
+    <div class="particle" style="left: 65%; top: 193%; animation-delay: 3s;"></div>
+    <div class="particle" style="left: 75%; top: 136%; animation-delay: 3.5s;"></div>
+    <div class="particle" style="left: 85%; top: 171%; animation-delay: 4s;"></div>
+    <div class="particle" style="left: 95%; top: 128%; animation-delay: 4.5s;"></div>
+    <div class="particle" style="left: 10%; top: 162%; animation-delay: 5s;"></div>
+    <div class="particle" style="left: 20%; top: 119%; animation-delay: 5.5s;"></div>
+    <div class="particle" style="left: 30%; top: 176%; animation-delay: 6s;"></div>
+    <div class="particle" style="left: 40%; top: 144%; animation-delay: 6.5s;"></div>
+    <div class="particle" style="left: 50%; top: 188%; animation-delay: 7s;"></div>
+    <div class="particle" style="left: 60%; top: 131%; animation-delay: 7.5s;"></div>
+    <div class="particle" style="left: 70%; top: 154%; animation-delay: 0.3s;"></div>
+    <div class="particle" style="left: 80%; top: 197%; animation-delay: 1.3s;"></div>
+    <div class="particle" style="left: 90%; top: 125%; animation-delay: 2.3s;"></div>
+    <div class="particle" style="left: 12%; top: 169%; animation-delay: 3.3s;"></div>
+
     <div class="container">
-        <div class="logo">🗄️ DBTweaker</div>
-        <div class="subtitle">AI-Powered Database Management</div>
+        <div class="login-box">
+            <div class="logo-container">
+                <div class="logo-icon">⚡</div>
+                <div class="logo-text">DBTweaker</div>
+                <div class="logo-subtitle">DATABASE MANAGEMENT SYSTEM</div>
+            </div>
 
-        <!-- Login Form -->
-        <div id="loginForm" class="form-container">
-            <h2 class="form-title">Welcome Back</h2>
-            <form id="loginFormElement">
-                <div class="input-group">
-                    <input type="text" id="loginUsername" placeholder=" " required>
-                    <label for="loginUsername">Username</label>
-                </div>
-                <div class="input-group">
-                    <input type="password" id="loginPassword" placeholder=" " required>
-                    <label for="loginPassword">Password</label>
-                </div>
-                <button type="submit" class="btn btn-primary">Sign In</button>
-                <div id="loginMessage" class="message" style="display: none;"></div>
-            </form>
-            <div class="toggle-text">
-                Don't have an account? 
-                <span class="toggle-link" onclick="toggleForm()">Create Account</span>
-            </div>
-        </div>
+            <div class="terminal-prompt">SYSTEM ACCESS REQUIRED</div>
 
-        <!-- Register Form -->
-        <div id="registerForm" class="form-container hidden">
-            <h2 class="form-title">Create Account</h2>
-            <form id="registerFormElement">
-                <div class="input-group">
-                    <input type="text" id="registerUsername" placeholder=" " required>
-                    <label for="registerUsername">Choose Username</label>
-                </div>
-                <div class="input-group">
-                    <input type="password" id="registerPassword" placeholder=" " required>
-                    <label for="registerPassword">Create Password</label>
-                </div>
-                <button type="submit" class="btn btn-primary">Create Account</button>
-                <div id="registerMessage" class="message" style="display: none;"></div>
-            </form>
-            <div class="toggle-text">
-                Already have an account? 
-                <span class="toggle-link" onclick="toggleForm()">Sign In</span>
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('login')">LOGIN</div>
+                <div class="tab" onclick="switchTab('register')">REGISTER</div>
             </div>
-        </div>
 
-        <!-- Features Section -->
-        <div class="features">
-            <div class="feature">
-                <div class="feature-icon">📝</div>
-                <div class="feature-text">Web Forms</div>
+            <div id="errorMessage" class="error-message"></div>
+            <div id="successMessage" class="success-message"></div>
+
+            <!-- Login Form -->
+            <div id="loginTab" class="tab-content active">
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label class="form-label">Username</label>
+                        <input type="text" class="form-input" id="loginUsername" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-input" id="loginPassword" required>
+                    </div>
+                    <button type="submit" class="submit-btn">ACCESS SYSTEM</button>
+                </form>
             </div>
-            <div class="feature">
-                <div class="feature-icon">🤖</div>
-                <div class="feature-text">AI Chatbot</div>
+
+            <!-- Register Form -->
+            <div id="registerTab" class="tab-content">
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label class="form-label">Username</label>
+                        <input type="text" class="form-input" id="registerUsername" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-input" id="registerPassword" required>
+                    </div>
+                    <button type="submit" class="submit-btn">CREATE ACCOUNT</button>
+                </form>
             </div>
-            <div class="feature">
-                <div class="feature-icon">🔄</div>
-                <div class="feature-text">Full CRUD</div>
+
+            <div class="footer-text">
+                Secure database access portal
             </div>
         </div>
     </div>
@@ -285,133 +430,99 @@
     <script>
         const API_BASE = 'http://localhost:3001';
 
-        // Clear any existing tokens on page load to prevent auto-login
-        function clearAuthTokens() {
-            localStorage.removeItem('jwt_token');
-            sessionStorage.removeItem('jwt_token');
-        }
+        function switchTab(tab) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
 
-        // Validate token with server
-        async function validateToken(token) {
-            try {
-                const response = await fetch(`${API_BASE}/api/userinfo`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                return response.ok;
-            } catch (error) {
-                return false;
-            }
-        }
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(tab + 'Tab').classList.add('active');
 
-        // Check and handle existing tokens
-        async function handleExistingAuth() {
-            const token = localStorage.getItem('jwt_token');
-            
-            if (token) {
-                // Validate the token with server
-                const isValid = await validateToken(token);
-                
-                if (isValid) {
-                    // Token is valid, redirect to dashboard
-                    window.location.href = 'dashboard.html';
-                    return;
-                } else {
-                    // Token is invalid, clear it
-                    clearAuthTokens();
-                }
-            }
-        }
-
-        // Toggle between login and register forms (global function)
-        function toggleForm() {
-            const loginForm = document.getElementById('loginForm');
-            const registerForm = document.getElementById('registerForm');
-            
-            loginForm.classList.toggle('hidden');
-            registerForm.classList.toggle('hidden');
-            
             // Clear messages
-            document.getElementById('loginMessage').style.display = 'none';
-            document.getElementById('registerMessage').style.display = 'none';
+            hideMessages();
         }
 
-        // Initialize page
-        document.addEventListener('DOMContentLoaded', async function() {
-            // For fresh start, you can uncomment the line below to always clear tokens
-            // clearAuthTokens();
-            
-            // Check existing authentication
-            await handleExistingAuth();
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => errorDiv.style.display = 'none', 5000);
+        }
 
-            // Show message helper
-            function showMessage(elementId, message, isError = false) {
-                const element = document.getElementById(elementId);
-                element.textContent = message;
-                element.className = `message ${isError ? 'error' : 'success'}`;
-                element.style.display = 'block';
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            setTimeout(() => successDiv.style.display = 'none', 3000);
+        }
+
+        function hideMessages() {
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+        }
+
+        // Login form
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideMessages();
+
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem('jwt_token', data.token);
+                    localStorage.setItem('username', username);
+                    showSuccess('Access granted! Redirecting...');
+                    setTimeout(() => window.location.href = 'dashboard.html', 1000);
+                } else {
+                    showError(data.error || 'Login failed');
+                }
+            } catch (error) {
+                showError('Network error. Please try again.');
             }
+        });
 
-            // Login form handler
-            document.getElementById('loginFormElement').onsubmit = async (e) => {
-                e.preventDefault();
-                const username = document.getElementById('loginUsername').value;
-                const password = document.getElementById('loginPassword').value;
-                
-                try {
-                    const response = await fetch(`${API_BASE}/api/login`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ username, password })
-                    });
-                    
-                    const data = await response.json();
-                    
-                    if (response.ok) {
-                        localStorage.setItem('jwt_token', data.token);
-                        localStorage.setItem('username', username);
-                        showMessage('loginMessage', 'Login successful! Redirecting...', false);
-                        
-                        setTimeout(() => {
-                            window.location.href = 'dashboard.html';
-                        }, 1500);
-                    } else {
-                        showMessage('loginMessage', data.error || 'Login failed', true);
-                    }
-                } catch (err) {
-                    showMessage('loginMessage', 'Network error. Please try again.', true);
-                }
-            };
+        // Register form
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideMessages();
 
-            // Register form handler
-            document.getElementById('registerFormElement').onsubmit = async (e) => {
-                e.preventDefault();
-                const username = document.getElementById('registerUsername').value;
-                const password = document.getElementById('registerPassword').value;
-                
-                try {
-                    const response = await fetch(`${API_BASE}/api/register`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ username, password })
-                    });
-                    
-                    const data = await response.json();
-                    
-                    if (response.ok) {
-                        showMessage('registerMessage', 'Account created successfully! Please sign in.', false);
-                        
-                        setTimeout(() => {
-                            toggleForm(); // Switch to login form
-                            document.getElementById('loginUsername').value = username;
-                        }, 2000);
-                    } else {
-                        showMessage('registerMessage', data.error || 'Registration failed', true);
-                    }
-                } catch (err) {
-                    showMessage('registerMessage', 'Network error. Please try again.', true);
+            const username = document.getElementById('registerUsername').value;
+            const password = document.getElementById('registerPassword').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showSuccess('Account created! Please login.');
+                    setTimeout(() => {
+                        switchTab('login');
+                        document.getElementById('loginUsername').value = username;
+                    }, 1500);
+                } else {
+                    showError(data.error || 'Registration failed');
                 }
-            };
+            } catch (error) {
+                showError('Network error. Please try again.');
+            }
         });
     </script>
 </body>
+
 </html>

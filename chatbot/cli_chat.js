@@ -31,8 +31,21 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 // Gemini API setup
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_MODEL = process.env.GEMINI_MODEL?.trim() || 'gemini-1.5-flash';
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+
+// Try different models until one works
+const modelNames = [
+    'gemini-2.0-flash-exp',
+    'gemini-exp-1206',
+    'gemini-2.0-flash',
+    'gemini-1.5-flash-latest',
+    'gemini-1.5-pro-latest',
+    'gemini-1.5-flash',
+    'gemini-1.5-pro',
+    'gemini-pro'
+];
+
+let workingModel = null;
 
 // Server endpoints
 const API_URL = 'http://localhost:3001/api';
@@ -101,19 +114,59 @@ function getOperationPrompt(userInput) {
     - "delete record 3" -> {"operation": "delete"}`;
 }
 
+function getFilterPrompt(userInput) {
+    return `Analyze this user query and extract any filter criteria for searching a database.
+User query: "${userInput}"
+
+The database has these fields: Id, Name, Phone, Address
+
+Respond with ONLY a JSON object in this format:
+{
+  "hasFilters": true/false,
+  "filters": [
+    {"field": "Name|Phone|Address", "value": "search term", "matchType": "exact|partial"}
+  ]
+}
+
+Examples:
+- "show people in Delhi" → {"hasFilters": true, "filters": [{"field": "Address", "value": "Delhi", "matchType": "partial"}]}
+- "find John" → {"hasFilters": true, "filters": [{"field": "Name", "value": "John", "matchType": "partial"}]}
+- "show all data" → {"hasFilters": false, "filters": []}
+- "people in Mumbai with phone 99" → {"hasFilters": true, "filters": [{"field": "Address", "value": "Mumbai", "matchType": "partial"}, {"field": "Phone", "value": "99", "matchType": "partial"}]}
+
+If the query doesn't specify any filters, set hasFilters to false.`;
+}
+
 // Extract operation type using Gemini
 async function extractOperation(userInput) {
     try {
-        const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
+        // Initialize working model if not done yet
+        if (!workingModel) {
+            for (const modelName of modelNames) {
+                try {
+                    const testModel = genAI.getGenerativeModel({ model: modelName });
+                    await testModel.generateContent('test');
+                    workingModel = testModel;
+                    console.log(`✅ Using model: ${modelName}`);
+                    break;
+                } catch (err) {
+                    continue;
+                }
+            }
+            if (!workingModel) {
+                throw new Error('No working Gemini model found');
+            }
+        }
+
         const prompt = getOperationPrompt(userInput);
-        const result = await model.generateContent(prompt);
+        const result = await workingModel.generateContent(prompt);
         const text = result.response.text();
         const match = text.match(/\{[\s\S]*\}/);
         if (!match) throw new Error('No JSON found in Gemini response');
         const json = JSON.parse(match[0]);
         return json.operation;
     } catch (err) {
-        console.error('Operation extraction error:', err.message);
+        console.error('❌ Operation extraction error:', err.message);
         return null;
     }
 }
@@ -121,9 +174,8 @@ async function extractOperation(userInput) {
 // Extract fields for CREATE operation
 async function extractCreateFields(userInput) {
     try {
-        const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
         const prompt = getCreatePrompt(userInput);
-        const result = await model.generateContent(prompt);
+        const result = await workingModel.generateContent(prompt);
         const text = result.response.text();
         const match = text.match(/\{[\s\S]*\}/);
         if (!match) throw new Error('No JSON found in Gemini response');
@@ -138,9 +190,8 @@ async function extractCreateFields(userInput) {
 // Extract fields for UPDATE operation
 async function extractUpdateFields(userInput) {
     try {
-        const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
         const prompt = getUpdatePrompt(userInput);
-        const result = await model.generateContent(prompt);
+        const result = await workingModel.generateContent(prompt);
         const text = result.response.text();
         const match = text.match(/\{[\s\S]*\}/);
         if (!match) throw new Error('No JSON found in Gemini response');
@@ -155,9 +206,8 @@ async function extractUpdateFields(userInput) {
 // Extract ID for DELETE operation
 async function extractDeleteId(userInput) {
     try {
-        const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
         const prompt = getDeletePrompt(userInput);
-        const result = await model.generateContent(prompt);
+        const result = await workingModel.generateContent(prompt);
         const text = result.response.text();
         const match = text.match(/\{[\s\S]*\}/);
         if (!match) throw new Error('No JSON found in Gemini response');
@@ -166,6 +216,22 @@ async function extractDeleteId(userInput) {
     } catch (err) {
         console.error('Delete extraction error:', err.message);
         return null;
+    }
+}
+
+// Extract filter criteria for READ operation
+async function extractFilters(userInput) {
+    try {
+        const prompt = getFilterPrompt(userInput);
+        const result = await workingModel.generateContent(prompt);
+        const text = result.response.text();
+        const match = text.match(/\{[\s\S]*\}/);
+        if (!match) return { hasFilters: false, filters: [] };
+        const json = JSON.parse(match[0]);
+        return json;
+    } catch (err) {
+        console.error('Filter extraction error:', err.message);
+        return { hasFilters: false, filters: [] };
     }
 }
 
@@ -191,32 +257,65 @@ async function createData(fields) {
     }
 }
 
-// READ operation
-async function readData() {
+// READ operation with intelligent filtering
+async function readData(userInput) {
     try {
+        // Extract filter criteria
+        const filterData = await extractFilters(userInput);
+
+        // Fetch all data from API
         const res = await fetch(`${API_URL}/userinfo`, {
             headers: { 'Authorization': 'Bearer ' + token }
         });
         const data = await res.json();
-        if (res.ok) {
-            if (data.data.length === 0) {
-                console.log(' No data found');
-            } else {
-                console.log('\n All User Data:');
-                console.log('==================');
-                data.data.forEach(item => {
-                    console.log(`ID: ${item.Id}`);
-                    console.log(`Name: ${item.Name}`);
-                    console.log(`Phone: ${item.Phone}`);
-                    console.log(`Address: ${item.Address}`);
-                    console.log('------------------');
+
+        if (!res.ok) {
+            console.log('❌ Read failed:', data.error);
+            return;
+        }
+
+        let results = data.data;
+
+        // Apply filters locally if needed
+        if (filterData.hasFilters && filterData.filters.length > 0) {
+            results = results.filter(item => {
+                return filterData.filters.every(filter => {
+                    const fieldValue = item[filter.field];
+                    if (!fieldValue) return false;
+
+                    if (filter.matchType === 'partial') {
+                        return fieldValue.toLowerCase().includes(filter.value.toLowerCase());
+                    } else {
+                        return fieldValue.toLowerCase() === filter.value.toLowerCase();
+                    }
                 });
+            });
+        }
+
+        // Display results
+        if (results.length === 0) {
+            if (filterData.hasFilters) {
+                console.log('🔍 No results found matching your search criteria');
+            } else {
+                console.log('📭 No data found');
             }
         } else {
-            console.log(' Read failed:', data.error);
+            if (filterData.hasFilters) {
+                console.log(`\n🔍 Found ${results.length} result(s) matching your search:`);
+            } else {
+                console.log('\n📋 All User Data:');
+            }
+            console.log('==================');
+            results.forEach(item => {
+                console.log(`ID: ${item.Id}`);
+                console.log(`Name: ${item.Name}`);
+                console.log(`Phone: ${item.Phone}`);
+                console.log(`Address: ${item.Address}`);
+                console.log('------------------');
+            });
         }
     } catch (err) {
-        console.error(' Read error:', err.message);
+        console.error('❌ Read error:', err.message);
     }
 }
 
@@ -263,31 +362,31 @@ async function deleteData(id) {
 // Main loop
 (async function main() {
     await login();
-    
-    console.log(' AI-Powered CRUD Chatbot');
+
+    console.log('🤖 AI-Powered Intelligent Chatbot');
     console.log('============================');
-    console.log('You can now perform CRUD operations using natural language!');
+    console.log('Ask me anything using natural language!');
     console.log('Examples:');
+    console.log('• "show people in Delhi" - Filter by location');
+    console.log('• "find John" - Search by name');
+    console.log('• "users with phone 98" - Filter by phone');
     console.log('• "Add new user: John Doe, phone 123456789, address New York"');
-    console.log('• "Show all data" or "list all entries"');
-    console.log('• "Update entry 5: name Alice, phone 987654321, address Boston"');
-    console.log('• "Delete entry 3" or "remove record 7"');
     console.log('• Type "exit" to quit\n');
-    
+
     while (true) {
         const input = await ask('  Enter your request: ');
         if (input.trim().toLowerCase() === 'exit') break;
-        
+
         // First, determine what operation the user wants
         const operation = await extractOperation(input);
-        
+
         if (!operation) {
             console.log(' Could not understand your request. Please try again.');
             continue;
         }
-        
+
         console.log(` Detected operation: ${operation.toUpperCase()}`);
-        
+
         switch (operation) {
             case 'create':
                 const createFields = await extractCreateFields(input);
@@ -298,12 +397,12 @@ async function deleteData(id) {
                     console.log(' Could not extract all required fields (name, phone, address). Please try again.');
                 }
                 break;
-                
+
             case 'read':
-                console.log(' Reading all data...');
-                await readData();
+                console.log('📖 Reading data...');
+                await readData(input);
                 break;
-                
+
             case 'update':
                 const updateFields = await extractUpdateFields(input);
                 if (updateFields && updateFields.id && updateFields.name && updateFields.phone && updateFields.address) {
@@ -317,7 +416,7 @@ async function deleteData(id) {
                     console.log(' Could not extract all required fields (id, name, phone, address). Please try again.');
                 }
                 break;
-                
+
             case 'delete':
                 const deleteId = await extractDeleteId(input);
                 if (deleteId) {
@@ -327,14 +426,14 @@ async function deleteData(id) {
                     console.log(' Could not extract entry ID. Please try again.');
                 }
                 break;
-                
+
             default:
                 console.log(' Unknown operation. Please try again.');
         }
-        
+
         console.log(''); // Add spacing
     }
-    
+
     rl.close();
     console.log(' Goodbye!');
     process.exit(0);

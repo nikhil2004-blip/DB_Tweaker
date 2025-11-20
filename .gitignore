@@ -13,6 +13,21 @@ python_docs/*.zip
 *.mdf
 *.ldf
 *.bak
+node_modules/
+backend/.env
+.env
+*.log
+
+# Database files (too large for GitHub)
+python_docs/*.mdf
+python_docs/*.ldf
+python_docs/*.bak
+python_docs/*.zip
+
+# Other large files
+*.mdf
+*.ldf
+*.bak
 
 # IDE and system files
 .vscode/
@@ -21,3 +36,7 @@ Thumbs.db
 
 # Docker volumes
 sqlserver_data/
+
+# SQLite database
+backend/database.sqlite
+*.sqlite
