@@ -27,13 +27,54 @@ const JWT_SECRET = process.env.JWT_SECRET || 'supersecret';
 const MONGODB_URI = process.env.MONGODB_URI;
 
 // MongoDB Connection
-if (!MONGODB_URI) {
-    console.error('❌ MONGODB_URI is missing in .env');
-} else {
-    mongoose.connect(MONGODB_URI)
-        .then(() => console.log('✅ Connected to MongoDB'))
-        .catch(err => console.error('❌ MongoDB Connection Error:', err));
+// MongoDB Connection Setup (Vercel Optimized)
+let cached = global.mongoose;
+if (!cached) {
+    cached = global.mongoose = { conn: null, promise: null };
 }
+
+async function connectToDatabase() {
+    if (cached.conn) return cached.conn;
+
+    if (!MONGODB_URI) {
+        throw new Error('MONGODB_URI is missing in environment variables');
+    }
+
+    if (!cached.promise) {
+        const opts = {
+            bufferCommands: false, // Fail immediately if not connected
+        };
+        cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
+            console.log('✅ New MongoDB Connection Established');
+            return mongoose;
+        });
+    }
+
+    try {
+        cached.conn = await cached.promise;
+    } catch (e) {
+        cached.promise = null;
+        throw e;
+    }
+
+    return cached.conn;
+}
+
+// Global Middleware to ensure DB is connected before handling requests
+app.use(async (req, res, next) => {
+    // Skip for static files if needed, but important for API
+    if (req.path.startsWith('/api')) {
+        try {
+            await connectToDatabase();
+            next();
+        } catch (error) {
+            console.error('Database Connection Failed:', error);
+            res.status(500).json({ error: 'Database Connection Failed', details: error.message });
+        }
+    } else {
+        next();
+    }
+});
 
 // Schemas
 const userSchema = new mongoose.Schema({
