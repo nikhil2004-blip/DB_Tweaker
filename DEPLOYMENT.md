@@ -139,6 +139,49 @@ Simply delete `backend/database.sqlite` and restart - it will recreate automatic
 
 ---
 
+## ⚠️ **CRITICAL: Cloud Deployment Warning**
+
+**SQLite Database Persistence**
+This application uses SQLite (`database.sqlite`), which is a file-based database.
+- **On Localhost:** Works perfectly.
+- **On Cloud (Vercel/Render Free Tier):** The file system is **ephemeral**.
+  - 🛑 **Every time you redeploy or the server restarts, your data will be ERASED.**
+  - **Solution for Production:**
+    1. Use a **Render Disk** (Paid feature) to persist the database file.
+    2. OR switch to a cloud database like **PostgreSQL** (Neon, Supabase) or **MongoDB** (Atlas).
+
+---
+
+## ☁️ **Cloud Deployment**
+
+### **Option 1: Render (Recommended)**
+Render is best for Node.js apps like this.
+
+1. Push your code to GitHub.
+2. Create a new **Web Service** on Render.
+3. Connect your repository.
+4. **Settings:**
+   - **Runtime:** Node
+   - **Build Command:** `npm install`
+   - **Start Command:** `node backend/server.js`
+5. **Environment Variables:**
+   - `GEMINI_API_KEY`: Your key from Google AI Studio.
+   - `JWT_SECRET`: A random secret string (e.g., `mysecret123`).
+   - `GEMINI_MODEL`: `gemini-1.5-flash`
+
+** Persisting Data on Render:**
+To save your database, you must add a **Disk** in Render settings (Paid) and mount it to `/opt/render/project/src/backend`.
+
+---
+
+### **Option 2: Vercel**
+**NOT RECOMMENDED** for this specific setup without code changes.
+- Vercel is designed for Serverless functions.
+- SQLite files will **not** persist.
+- You would need to migrate to a cloud database (PostgreSQL/MySQL) for this to work properly on Vercel.
+
+---
+
 ## ✨ **Features**
 
 - ✅ **Fully automated** - One command to start everything

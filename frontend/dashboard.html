@@ -741,7 +741,7 @@
             };
 
             try {
-                const response = await fetch(`${API_BASE}/api/update/${id}`, {
+                const response = await fetch(`${API_BASE}/api/userinfo/${id}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -772,7 +772,7 @@
             }
 
             try {
-                const response = await fetch(`${API_BASE}/api/delete/${id}`, {
+                const response = await fetch(`${API_BASE}/api/userinfo/${id}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
