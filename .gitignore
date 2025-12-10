@@ -36,3 +36,7 @@ sqlserver_data/
 # SQLite database
 backend/database.sqlite
 *.sqlite
+
+# Secrets
+.env
+backend/.env
