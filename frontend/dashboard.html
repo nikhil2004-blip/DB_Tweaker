@@ -641,12 +641,38 @@
         let token = localStorage.getItem('jwt_token');
         let username = localStorage.getItem('username');
 
-        // Check authentication
-        if (!token || !username) {
-            window.location.href = 'login.html';
+        // STRONG AUTHENTICATION CHECK
+        async function checkAuth() {
+            if (!token || !username) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                // Verify token with backend
+                // (Using /api/userinfo as a quick validity check since it requires auth)
+                const response = await fetch(`${API_BASE}/api/userinfo?limit=1`, {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Session invalid');
+                }
+
+                // If valid, show UI
+                document.getElementById('usernameDisplay').textContent = username.toUpperCase();
+                document.querySelector('.main-content').style.display = 'block'; // Show content only after verified
+
+            } catch (error) {
+                console.warn('Auth failed:', error);
+                logout(); // Clear bad token and redirect
+            }
         }
 
-        document.getElementById('usernameDisplay').textContent = username.toUpperCase();
+        // Hide content initially to prevent "flash" of unauth content
+        document.querySelector('.main-content').style.display = 'none';
+        checkAuth();
 
         // Tab switching
         function switchTab(tabName) {
