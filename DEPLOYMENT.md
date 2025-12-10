@@ -139,16 +139,17 @@ Simply delete `backend/database.sqlite` and restart - it will recreate automatic
 
 ---
 
-## ⚠️ **CRITICAL: Cloud Deployment Warning**
+---
 
-**SQLite Database Persistence**
-This application uses SQLite (`database.sqlite`), which is a file-based database.
-- **On Localhost:** Works perfectly.
-- **On Cloud (Vercel/Render Free Tier):** The file system is **ephemeral**.
-  - 🛑 **Every time you redeploy or the server restarts, your data will be ERASED.**
-  - **Solution for Production:**
-    1. Use a **Render Disk** (Paid feature) to persist the database file.
-    2. OR switch to a cloud database like **PostgreSQL** (Neon, Supabase) or **MongoDB** (Atlas).
+## ☁️ **Cloud Deployment (Ready)**
+
+**MongoDB Configured** ✅
+Your application is now configured to use **MongoDB**.
+- Data **WILL** persist on Vercel/Render.
+- Ensure you have added `MONGODB_URI` to your Vercel/Render Environment Variables.
+
+> [!NOTE]
+> If your AI Chatbot doesn't work, check your `GEMINI_API_KEY`. The app will still function without it!
 
 ---
 

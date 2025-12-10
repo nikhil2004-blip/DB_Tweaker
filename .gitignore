@@ -1,7 +1,5 @@
 node_modules/
-backend/.env
-.env
-*.log
+
 
 # Database files (too large for GitHub)
 python_docs/*.mdf
@@ -14,8 +12,6 @@ python_docs/*.zip
 *.ldf
 *.bak
 node_modules/
-backend/.env
-.env
 *.log
 
 # Database files (too large for GitHub)
